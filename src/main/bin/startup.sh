@@ -85,7 +85,7 @@ then
 	if [ $client_mode == "Cluster" ] ; then 
 		$JAVA $JAVA_OPTS $JAVA_DEBUG_OPT $CANAL_OPTS -classpath .:$CLASSPATH com.alibaba.otter.canal.example.ClusterCanalClientTest 1>>$base/bin/nohup.out 2>&1 &
 	else 
-		$JAVA $JAVA_OPTS $JAVA_DEBUG_OPT $CANAL_OPTS -classpath .:$CLASSPATH com.alibaba.otter.canal.example.SimpleCanalClientTest 1>>$base/bin/nohup.out 2>&1 &
+		$JAVA $JAVA_OPTS $JAVA_DEBUG_OPT $CANAL_OPTS -classpath .:$CLASSPATH com.alibaba.otter.canal.example.SimpleCanalClientApp 1>>$base/bin/nohup.out 2>&1 &
 	fi
 	
 	echo $! > $base/bin/canal.pid 

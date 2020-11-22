@@ -1,12 +1,11 @@
 package com.alibaba.otter.canal.example;
 
+import com.alibaba.otter.canal.client.CanalConnector;
 import com.alibaba.otter.canal.protocol.CanalEntry;
+import com.alibaba.otter.canal.protocol.Message;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.util.Assert;
-
-import com.alibaba.otter.canal.client.CanalConnector;
-import com.alibaba.otter.canal.protocol.Message;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -18,15 +17,15 @@ import java.util.List;
  * @author jianghang 2013-4-15 下午04:17:12
  * @version 1.0.4
  */
-public class AbstractCanalClientTest extends BaseCanalClientTest {
+public class AbstractCanalClient extends BaseCanalClient {
 
     private CanalListener canalListener;
 
-    public AbstractCanalClientTest(String destination) {
+    public AbstractCanalClient(String destination) {
         this(destination, null);
     }
 
-    public AbstractCanalClientTest(String destination, CanalConnector connector) {
+    public AbstractCanalClient(String destination, CanalConnector connector) {
         this.destination = destination;
         this.connector = connector;
     }

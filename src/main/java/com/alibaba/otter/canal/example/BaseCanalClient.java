@@ -1,43 +1,34 @@
 package com.alibaba.otter.canal.example;
 
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
+import com.alibaba.otter.canal.client.CanalConnector;
+import com.alibaba.otter.canal.protocol.CanalEntry;
+import com.alibaba.otter.canal.protocol.CanalEntry.*;
+import com.alibaba.otter.canal.protocol.Message;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import com.alibaba.otter.canal.client.CanalConnector;
-import com.alibaba.otter.canal.protocol.CanalEntry;
-import com.alibaba.otter.canal.protocol.CanalEntry.Column;
-import com.alibaba.otter.canal.protocol.CanalEntry.Entry;
-import com.alibaba.otter.canal.protocol.CanalEntry.EntryType;
-import com.alibaba.otter.canal.protocol.CanalEntry.EventType;
-import com.alibaba.otter.canal.protocol.CanalEntry.Pair;
-import com.alibaba.otter.canal.protocol.CanalEntry.RowChange;
-import com.alibaba.otter.canal.protocol.CanalEntry.RowData;
-import com.alibaba.otter.canal.protocol.CanalEntry.TransactionBegin;
-import com.alibaba.otter.canal.protocol.CanalEntry.TransactionEnd;
-import com.alibaba.otter.canal.protocol.Message;
-import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
-public class BaseCanalClientTest {
+public class BaseCanalClient {
 
-    protected final static Logger             logger             = LoggerFactory.getLogger(AbstractCanalClientTest.class);
-    protected static final String             SEP                = SystemUtils.LINE_SEPARATOR;
-    protected static final String             DATE_FORMAT        = "yyyy-MM-dd HH:mm:ss";
-    protected volatile boolean                running            = false;
-    protected Thread.UncaughtExceptionHandler handler            = (t, e) -> logger.error("parse events has an error", e);
-    protected Thread                          thread             = null;
-    protected CanalConnector                  connector;
-    protected static String                   context_format     = null;
-    protected static String                   row_format         = null;
-    protected static String                   transaction_format = null;
-    protected String                          destination;
+    protected final static Logger logger = LoggerFactory.getLogger(AbstractCanalClient.class);
+    protected static final String SEP = SystemUtils.LINE_SEPARATOR;
+    protected static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    protected volatile boolean running = false;
+    protected Thread.UncaughtExceptionHandler handler = (t, e) -> logger.error("parse events has an error", e);
+    protected Thread thread = null;
+    protected CanalConnector connector;
+    protected static String context_format = null;
+    protected static String row_format = null;
+    protected static String transaction_format = null;
+    protected String destination;
 
     static {
         context_format = SEP + "****************************************************" + SEP;
@@ -47,12 +38,12 @@ public class BaseCanalClientTest {
         context_format += "****************************************************" + SEP;
 
         row_format = SEP
-                     + "----------------> binlog[{}:{}] , name[{},{}] , eventType : {} , executeTime : {}({}) , gtid : ({}) , delay : {} ms"
-                     + SEP;
+                + "----------------> binlog[{}:{}] , name[{},{}] , eventType : {} , executeTime : {}({}) , gtid : ({}) , delay : {} ms"
+                + SEP;
 
         transaction_format = SEP
-                             + "================> binlog[{}:{}] , executeTime : {}({}) , gtid : ({}) , delay : {}ms"
-                             + SEP;
+                + "================> binlog[{}:{}] , executeTime : {}({}) , gtid : ({}) , delay : {}ms"
+                + SEP;
 
     }
 
@@ -70,8 +61,8 @@ public class BaseCanalClientTest {
         }
 
         SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-        logger.info(context_format, new Object[] { batchId, size, memsize, format.format(new Date()), startPosition,
-                endPosition });
+        logger.info(context_format, new Object[]{batchId, size, memsize, format.format(new Date()), startPosition,
+                endPosition});
     }
 
     protected String buildPositionForDump(Entry entry) {
@@ -79,7 +70,7 @@ public class BaseCanalClientTest {
         Date date = new Date(time);
         SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
         String position = entry.getHeader().getLogfileName() + ":" + entry.getHeader().getLogfileOffset() + ":"
-                          + entry.getHeader().getExecuteTime() + "(" + format.format(date) + ")";
+                + entry.getHeader().getExecuteTime() + "(" + format.format(date) + ")";
         if (StringUtils.isNotEmpty(entry.getHeader().getGtid())) {
             position += " gtid(" + entry.getHeader().getGtid() + ")";
         }
@@ -103,10 +94,10 @@ public class BaseCanalClientTest {
                     }
                     // 打印事务头信息，执行的线程id，事务耗时
                     logger.info(transaction_format,
-                        new Object[] { entry.getHeader().getLogfileName(),
-                                String.valueOf(entry.getHeader().getLogfileOffset()),
-                                String.valueOf(entry.getHeader().getExecuteTime()), simpleDateFormat.format(date),
-                                entry.getHeader().getGtid(), String.valueOf(delayTime) });
+                            new Object[]{entry.getHeader().getLogfileName(),
+                                    String.valueOf(entry.getHeader().getLogfileOffset()),
+                                    String.valueOf(entry.getHeader().getExecuteTime()), simpleDateFormat.format(date),
+                                    entry.getHeader().getGtid(), String.valueOf(delayTime)});
                     logger.info(" BEGIN ----> Thread id: {}", begin.getThreadId());
                     printXAInfo(begin.getPropsList());
                 } else if (entry.getEntryType() == EntryType.TRANSACTIONEND) {
@@ -121,10 +112,10 @@ public class BaseCanalClientTest {
                     logger.info(" END ----> transaction id: {}", end.getTransactionId());
                     printXAInfo(end.getPropsList());
                     logger.info(transaction_format,
-                        new Object[] { entry.getHeader().getLogfileName(),
-                                String.valueOf(entry.getHeader().getLogfileOffset()),
-                                String.valueOf(entry.getHeader().getExecuteTime()), simpleDateFormat.format(date),
-                                entry.getHeader().getGtid(), String.valueOf(delayTime) });
+                            new Object[]{entry.getHeader().getLogfileName(),
+                                    String.valueOf(entry.getHeader().getLogfileOffset()),
+                                    String.valueOf(entry.getHeader().getExecuteTime()), simpleDateFormat.format(date),
+                                    entry.getHeader().getGtid(), String.valueOf(delayTime)});
                 }
 
                 continue;
@@ -141,11 +132,11 @@ public class BaseCanalClientTest {
                 EventType eventType = rowChage.getEventType();
 
                 logger.info(row_format,
-                    new Object[] { entry.getHeader().getLogfileName(),
-                            String.valueOf(entry.getHeader().getLogfileOffset()), entry.getHeader().getSchemaName(),
-                            entry.getHeader().getTableName(), eventType,
-                            String.valueOf(entry.getHeader().getExecuteTime()), simpleDateFormat.format(date),
-                            entry.getHeader().getGtid(), String.valueOf(delayTime) });
+                        new Object[]{entry.getHeader().getLogfileName(),
+                                String.valueOf(entry.getHeader().getLogfileOffset()), entry.getHeader().getSchemaName(),
+                                entry.getHeader().getTableName(), eventType,
+                                String.valueOf(entry.getHeader().getExecuteTime()), simpleDateFormat.format(date),
+                                entry.getHeader().getGtid(), String.valueOf(delayTime)});
 
                 if (eventType == EventType.QUERY || rowChage.getIsDdl()) {
                     logger.info(" sql ----> " + rowChage.getSql() + SEP);
@@ -171,10 +162,10 @@ public class BaseCanalClientTest {
             StringBuilder builder = new StringBuilder();
             try {
                 if (StringUtils.containsIgnoreCase(column.getMysqlType(), "BLOB")
-                    || StringUtils.containsIgnoreCase(column.getMysqlType(), "BINARY")) {
+                        || StringUtils.containsIgnoreCase(column.getMysqlType(), "BINARY")) {
                     // get value bytes
                     builder.append(column.getName() + " : "
-                                   + new String(column.getValue().getBytes("ISO-8859-1"), "UTF-8"));
+                            + new String(column.getValue().getBytes("ISO-8859-1"), "UTF-8"));
                 } else {
                     builder.append(column.getName() + " : " + column.getValue());
                 }
@@ -216,7 +207,7 @@ public class BaseCanalClientTest {
 
     /**
      * 获取当前Entry的 GTID信息示例
-     * 
+     *
      * @param header
      * @return
      */
@@ -234,7 +225,7 @@ public class BaseCanalClientTest {
 
     /**
      * 获取当前Entry的 GTID Sequence No信息示例
-     * 
+     *
      * @param header
      * @return
      */
@@ -252,7 +243,7 @@ public class BaseCanalClientTest {
 
     /**
      * 获取当前Entry的 GTID Last Committed信息示例
-     * 
+     *
      * @param header
      * @return
      */

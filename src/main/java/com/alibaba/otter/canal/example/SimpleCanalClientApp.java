@@ -1,15 +1,10 @@
 package com.alibaba.otter.canal.example;
 
-import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.util.List;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.otter.canal.client.CanalConnector;
 import com.alibaba.otter.canal.client.CanalConnectors;
-import com.alibaba.otter.canal.common.utils.AddressUtils;
-import com.alibaba.otter.canal.protocol.CanalEntry;
-import org.apache.commons.lang.StringUtils;
+
+import java.net.InetSocketAddress;
 
 /**
  * 单机模式的测试例子
@@ -17,9 +12,9 @@ import org.apache.commons.lang.StringUtils;
  * @author jianghang 2013-4-15 下午04:19:20
  * @version 1.0.4
  */
-public class SimpleCanalClientTest extends AbstractCanalClientTest {
+public class SimpleCanalClientApp extends AbstractCanalClient {
 
-    public SimpleCanalClientTest(String destination) {
+    public SimpleCanalClientApp(String destination) {
         super(destination);
     }
 
@@ -32,7 +27,7 @@ public class SimpleCanalClientTest extends AbstractCanalClientTest {
                 "root",
                 "test");
 
-        final SimpleCanalClientTest clientTest = new SimpleCanalClientTest(destination);
+        final SimpleCanalClientApp clientTest = new SimpleCanalClientApp(destination);
         clientTest.setConnector(connector);
         clientTest.setListener(new CanalListener() {
 
